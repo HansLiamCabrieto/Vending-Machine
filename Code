@@ -1,4 +1,4 @@
-import time
+import time  # gives a pause to make it look better lol
 
 print("Welcome to the W Mans Hans Vending Machine.")
 
@@ -16,50 +16,73 @@ time.sleep(2)
 
 # Creating variables to save the cost and stock
 products = {
-    "a1": {"name": "Juice", "price": 3, "stock": 8, "Category": "Drink"},
-    "a2": {"name": "Candy", "price": 1, "stock": 8, "Category": "Food"},
-    "a3": {"name": "Soda", "price": 3, "stock": 8, "Category": "Drink"},
-    "a4": {"name": "Water", "price": 1, "stock": 8, "Category": "Drink"},
-    "a5": {"name": "Chicken", "price": 9, "stock": 8, "Category": "Food"},
-    "a6": {"name": "Milk", "price": 4, "stock": 8, "Category": "Drink"},
-    "a7": {"name": "Cookie", "price": 3, "stock": 8, "Category": "Food"}
+    "a1": {"name": "Juice", "price": 3, "stock": 8, "Category": "drink"},
+    "a2": {"name": "Candy", "price": 1, "stock": 8, "Category": "food"},
+    "a3": {"name": "Soda", "price": 3, "stock": 8, "Category": "drink"},
+    "a4": {"name": "Water", "price": 1, "stock": 8, "Category": "drink"},
+    "a5": {"name": "Chicken", "price": 9, "stock": 8, "Category": "food"},
+    "a6": {"name": "Milk", "price": 4, "stock": 8, "Category": "drink"},
+    "a7": {"name": "Cookie", "price": 3, "stock": 8, "Category": "food"}
 }
 
 # Create a dictionary to track how many of each item has been bought
 items_bought = {"item1": 0, "item2": 0, "item3": 0, "item4": 0, "item5": 0, "item6": 0, "item7": 0}
 
 # Group products by category
-categories = {"Drink": [], "Food": []}
+categories = {"drink": [], "food": []}
 for code, details in products.items():
     categories[details["Category"]].append(code)
 
-# Ask the user to pick between Drinks or Food
+# Ask the user to pick between Drinks or Food initially
+current_category = ""
 while True:
     category_choice = input("What would you like to buy? 'Drinks' or 'Food' ").lower()
     if category_choice in categories:
+        current_category = category_choice
         break
     else:
         print("Invalid, please enter 'Drinks' or 'Food'.")
 
-print(f"\nYou picked {category_choice.capitalize()}s. Here are what we offer:\n")
+print(f"\nYou picked {current_category.capitalize()}. Here are what we offer:\n")
 time.sleep(2)
-
-# Display products in the chosen category
-for code in categories[category_choice.capitalize()]:
-    details = products[code]
-    print(f"Code: {code.upper()}, Item: {details['name']}, Price: Aed {details['price']}, Stock: {details['stock']}")
-print("")
 
 # Asking the user to choose an item or to finish
 while change > 0:
-    choice = input("Enter the code of the item you want to buy (or type 'F' when finished): ").lower()
+    # Display products in the current category
+    for code in categories[current_category]:
+        details = products[code]
+        print(f"Code: {code.upper()}, Item: {details['name']}, Price: Aed {details['price']}, Stock: {details['stock']}")
+    
+    print("\nYour remaining balance is Aed", change)
+    choice = input("Enter the code of the item you want to buy (or type 'F' to finish, 'S' to switch category): ").lower()
 
-    if choice in products:
-        # Checks if the item is from the selected category
-        if products[choice]["Category"].lower() == category_choice:
-            # Checks if there is stock available
+    if choice == "f":  # User wants to finish
+        print("\nHere is your transaction details:\n")
+        print("You purchased: ")
+        for i, count in items_bought.items():
+            if count > 0:
+                # connects the items together, e.g., a1-item1
+                code = f"a{list(items_bought.keys()).index(i) + 1}"
+                print(f"{products[code]['name']} x {count}")
+        print(f"You have Aed {change} as your change.")
+        break
+
+    elif choice == "s":  # User wants to switch category
+        # Toggle category
+        if current_category == "drink":
+            current_category = "food"
+        else:
+            current_category = "drink"
+        print(f"\nYou switched to {current_category.capitalize()}s. Here are what we offer:\n")
+        time.sleep(2)
+        continue
+
+    elif choice in products:
+        # Check if the item is from the selected category
+        if products[choice]["Category"].lower() == current_category:
+            # Check if there is stock available
             if products[choice]["stock"] > 0:
-                # Checks if the user has enough money
+                # Check if the user has enough money
                 if change >= products[choice]["price"]:
                     item_name = products[choice]["name"]
                     item_price = products[choice]["price"]
@@ -88,17 +111,7 @@ while change > 0:
             else:
                 print(f"Sorry, {products[choice]['name']} is out of stock.")
         else:
-            print(f"Please select an item from the {category_choice.capitalize()} category.")
-    elif choice == "f":  # checks if the user wants to finish
-        print("\nHere is your transaction details:\n")
-        print("You purchased: ")
-        for i, count in items_bought.items():
-            if count > 0:
-                # connects the items together, e.g., a1-item1
-                code = f"a{list(items_bought.keys()).index(i) + 1}"
-                print(f"{products[code]['name']} x {count}")
-        print(f"You have Aed {change} as your change.")
-        break
+            print(f"Please select an item from the {current_category.capitalize()} category.")
     else:
         print("Invalid code. Please enter a valid product code (e.g., A1, A2, etc.)")
 
